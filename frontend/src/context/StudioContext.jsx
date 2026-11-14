@@ -10,11 +10,16 @@ export function StudioProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
+  const [apiStatus, setApiStatus] = useState("checking");
 
   const refresh = useCallback(async () => {
     setRefreshing(true);
     const assetIds = getTrackedAssetIds();
-    const assetResults = await Promise.allSettled(assetIds.map((id) => api.getAsset(id)));
+    const [healthResults, assetResults] = await Promise.all([
+      Promise.allSettled([api.getHealth()]),
+      Promise.allSettled(assetIds.map((id) => api.getAsset(id))),
+    ]);
+    setApiStatus(healthResults[0].status === "fulfilled" ? "connected" : "unavailable");
     const foundAssets = assetResults
       .filter((result) => result.status === "fulfilled")
       .map((result) => result.value);
@@ -25,7 +30,7 @@ export function StudioProvider({ children }) {
     const foundJobs = jobResults
       .filter((result) => result.status === "fulfilled")
       .flatMap((result) => result.value);
-    const failures = [...assetResults, ...jobResults].filter(
+    const failures = [...healthResults, ...assetResults, ...jobResults].filter(
       (result) => result.status === "rejected",
     );
 
@@ -65,8 +70,8 @@ export function StudioProvider({ children }) {
   }, [hasActiveJobs, refresh, jobs]);
 
   const value = useMemo(
-    () => ({ assets, jobs, loading, refreshing, error, refresh, rememberAsset }),
-    [assets, jobs, loading, refreshing, error, refresh, rememberAsset],
+    () => ({ assets, jobs, loading, refreshing, error, apiStatus, refresh, rememberAsset }),
+    [assets, jobs, loading, refreshing, error, apiStatus, refresh, rememberAsset],
   );
 
   return <StudioContext.Provider value={value}>{children}</StudioContext.Provider>;

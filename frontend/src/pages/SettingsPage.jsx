@@ -2,7 +2,7 @@ import { ExternalLink, ServerCog } from "lucide-react";
 import PageHeader from "../components/PageHeader.jsx";
 
 export default function SettingsPage() {
-  const apiUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+  const apiUrl = import.meta.env.VITE_API_BASE_URL?.trim() || "Not configured";
 
   return (
     <>
@@ -17,7 +17,7 @@ export default function SettingsPage() {
           <div><p className="eyebrow">API CONNECTION</p><h2>Backend endpoint</h2></div>
         </div>
         <div className="settings-row">
-          <div><strong>Configured API URL</strong><span>Requests are sent to this service.</span></div>
+          <div><strong>Configured API URL</strong><span>Set VITE_API_BASE_URL in the frontend environment.</span></div>
           <code>{apiUrl}</code>
         </div>
         <div className="settings-row">

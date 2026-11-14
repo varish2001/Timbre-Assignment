@@ -5,7 +5,7 @@ A small Express and PostgreSQL API for storing audio/video asset metadata and si
 ## Run Locally
 
 1. Install dependencies with `npm install`.
-2. Make sure PostgreSQL is running and the existing `.env` points at the local `timbre_api` database. Keep `.env` private; it is ignored by Git.
+2. Make sure PostgreSQL is running and the existing `.env` points at the local `timbre_api` database. Keep `.env` private; it is ignored by Git. For Render, set `FRONTEND_ORIGIN` to the exact HTTPS Vercel origin without a trailing slash. Local development always allows `http://localhost:5173`.
 3. Apply the schema once from this folder, using a PostgreSQL account that can create tables:
 
 	 ```powershell
@@ -16,6 +16,8 @@ A small Express and PostgreSQL API for storing audio/video asset metadata and si
 5. Check `http://localhost:5000/health`.
 
 The migration uses `IF NOT EXISTS`, so it can be safely run again. It creates `assets` and `jobs`; it does not create any bonus tables.
+
+The Express app enables CORS before its API routes for `http://localhost:5173` and the origin configured by `FRONTEND_ORIGIN`. Production startup requires that exact HTTPS origin. CORS preflight requests are handled by the middleware; credentials are not enabled.
 
 ## Project Files
 

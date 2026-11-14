@@ -33,8 +33,14 @@ function currentTitle(pathname) {
 export default function StudioLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
-  const { error, refreshing, refresh } = useStudio();
-  const apiState = error ? "Needs attention" : refreshing ? "Syncing" : "Studio workspace";
+  const { apiStatus, refreshing, refresh } = useStudio();
+  const apiState = refreshing
+    ? "Syncing"
+    : apiStatus === "checking"
+      ? "Checking API"
+      : apiStatus === "connected"
+        ? "API connected"
+        : "API unavailable";
 
   function closeMenu() {
     setMobileOpen(false);
@@ -101,7 +107,7 @@ export default function StudioLayout() {
             </div>
           </div>
           <button className="api-indicator" onClick={refresh} title="Refresh data from the API">
-            <span className={`connection-dot ${error ? "connection-error" : ""}`} />
+            <span className={`connection-dot ${apiStatus === "unavailable" ? "connection-error" : ""}`} />
             <span>{apiState}</span>
             <span className="api-refresh">Refresh</span>
           </button>

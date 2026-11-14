@@ -15,7 +15,7 @@ Timbre Studio is a React dashboard for the Timbre Mini Processing API. The front
    npm install
    ```
 
-3. Copy `.env.example` to `.env` if you need to change the API URL. The default is `http://localhost:5000`.
+3. Copy `.env.example` to `.env`. The local API URL is `http://localhost:5000`.
 4. Start Vite:
 
    ```powershell
@@ -24,7 +24,13 @@ Timbre Studio is a React dashboard for the Timbre Mini Processing API. The front
 
    Open the local URL printed by Vite.
 
-The Vite development server proxies API requests to `VITE_API_BASE_URL`, so local development does not require adding CORS support to the backend. For a separately hosted frontend and backend, configure the backend to allow the deployed frontend origin and set `VITE_API_BASE_URL` to the backend URL when building the frontend.
+The frontend calls the configured backend URL directly (the API routes do not use an `/api` prefix). The backend allows `http://localhost:5173` for local development.
+
+## Deploy separately
+
+- On Render, set `FRONTEND_ORIGIN` to the exact deployed Vercel origin, for example `https://your-studio.vercel.app`, with no trailing slash. Production startup rejects a missing, invalid, or non-HTTPS origin. The local development origin remains allowed.
+- On Vercel, set `VITE_API_BASE_URL` to the Render service origin, for example `https://your-api.onrender.com`, with no `/api` suffix. Vite embeds this value at build time, so redeploy Vercel after changing it.
+- The frontend and backend do not use credentialed requests. Keep PostgreSQL credentials only in Render's backend environment.
 
 ## API coverage
 

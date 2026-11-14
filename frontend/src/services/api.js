@@ -1,9 +1,12 @@
 import axios from "axios";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.trim();
+
 const apiClient = axios.create({
-  baseURL: import.meta.env.DEV
-    ? "/api"
-    : import.meta.env.VITE_API_BASE_URL || "http://localhost:5000",
+  baseURL: API_BASE_URL,
+  headers: {
+    Accept: "application/json",
+  },
   timeout: 20000,
 });
 
@@ -43,17 +46,17 @@ function requireJob(value) {
 
 function getErrorMessage(error) {
   if (axios.isAxiosError(error)) {
-    if (error.response?.data && typeof error.response.data.message === "string") {
-      return error.response.data.message;
-    }
     if (error.code === "ECONNABORTED") {
       return "The API request timed out. Try again.";
     }
     if (!error.response) {
-      return "Could not reach the API. Check that the backend is running and the API URL is correct.";
+      return "Could not reach the API. Check the URL, backend availability, and CORS allowlist.";
     }
     if (error.response.status >= 500) {
-      return `The API returned a server error (HTTP ${error.response.status}). Check that the backend is running and try again.`;
+      return `The API returned a server error (HTTP ${error.response.status}). Check the backend logs and try again.`;
+    }
+    if (error.response.data && typeof error.response.data.message === "string") {
+      return error.response.data.message;
     }
     return `The API request failed with status ${error.response.status}.`;
   }
@@ -61,6 +64,9 @@ function getErrorMessage(error) {
 }
 
 async function request(action) {
+  if (!API_BASE_URL) {
+    throw new Error("VITE_API_BASE_URL is not configured. Set it in the frontend environment and rebuild.");
+  }
   try {
     return await action();
   } catch (error) {
@@ -69,6 +75,16 @@ async function request(action) {
 }
 
 export const api = {
+  async getHealth() {
+    return request(async () => {
+      const health = requireRecord((await apiClient.get("/health")).data, "health");
+      if (health.success !== true || typeof health.message !== "string") {
+        throw new Error("The API returned an invalid health response.");
+      }
+      return health;
+    });
+  },
+
   async getAsset(assetId) {
     return request(async () => requireAsset((await apiClient.get(`/assets/${assetId}`)).data));
   },
