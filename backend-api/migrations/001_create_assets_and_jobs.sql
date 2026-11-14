@@ -18,4 +18,4 @@ CREATE TABLE IF NOT EXISTS jobs (
 );
 
 CREATE INDEX IF NOT EXISTS jobs_asset_id_created_at_idx
-  ON jobs (asset_id, created_at DESC);
+  ON jobs (asset_id, created_at DESC); 

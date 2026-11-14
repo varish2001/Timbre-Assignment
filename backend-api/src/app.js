@@ -16,7 +16,7 @@ app.get("/health", (req, res) => {
 });
 
 app.use("/assets", assetRoutes);
-app.use("/jobs", jobRoutes);
+app.use("/jobs", jobRoutes);                                                         
 
 app.use((req, res, next) => {
   next(new AppError(404, "Route not found"));
